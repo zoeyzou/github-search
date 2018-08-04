@@ -8,8 +8,14 @@
   <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <style>
-    .logo {
-      width: 50px;
+    .container-fluid {
+      padding: 0;
+    }
+    .navbar {
+      width: 100%;
+    }
+    .nav-link {
+      color: white;
     }
     h2 {
       text-align: center;
@@ -22,18 +28,42 @@
     .long-button {
       margin: 1em 0;
     }
+    .search {
+      display: none;
+    }
+    .search:first-child {
+      display: block;
+    }
+    .input-radio {
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
-  <header class="container-fluid w-100 bg-info">
-    <h1 class="text-light p-3" style="text-align: center;">
-      <img src="https://avatars2.githubusercontent.com/u/20858568?v=4" alt="Hack Your Future Logo" class="logo">
-      HYF-JS2-Week6-Homework
-    </h1>
+  <header class="container-fluid">
+    <nav class="navbar navbar-light bg-info">
+      <a class="navbar-brand" href="#">
+        <img src="https://avatars2.githubusercontent.com/u/20858568?v=4" width="30" height="30" class="d-inline-block align-top" alt="Hack Your Future Logo">
+        HYF-JS2-Week6-Homework
+      </a>
+      <ul class="nav nav-pills justify-content-end">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Movie Search <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Course Search</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Github User Search</a>
+        </li>
+        <li><button class="btn btn-danger btn-block" id="clear-all-button">Clear All Results</button></li>
+      </ul>
+
+    </nav>
   </header>
   <div class="container">
     <!-- Movie search API Element -->
-    <div class="row">
+    <div class="row search">
       <form class="col-xs-12 mx-auto form" id="movie-search-form">
           <h2 class="text-secondary">Search for your favorite movie!</h2>
           <div class="input-group mb-3">
@@ -44,24 +74,46 @@
           </div>
       </form>
     </div>
-    <hr>
     <!-- Github search API element -->
-    <div class="row">
+    <div class="row search">
       <form class="col-xs-12 mx-auto form" id="repo-search-form">
           <h2 class="text-secondary">Wanna know more about HYF's curriculum? Check all or search!</h2>
-          <div class="input-group mb-3">
-            <div class="input-group-append">
-              <button class="btn btn-outline-success" type="button" name="search-all" id="all-repo-search-button">Check All Courses</button>
-            </div>
-            <input type="text" class="form-control" name="repo-name" placeholder="Type in the course name" aria-label="movie name" aria-describedby="button-addon2">
-            <div class="input-group-append">
-              <button class="btn btn-info repo-search-button" type="submit" name="submit">Search Course</button>
-            </div>
-          </div>
+
+              <div class="input-group mb-3">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-success" type="button" name="search-all" id="all-repo-search-button">Check All Courses</button>
+                </div>
+                <input type="text" class="form-control" name="repo-name" placeholder="Type in the course name" aria-label="movie name" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                  <button class="btn btn-info repo-search-button" type="submit" name="submit">Search Course</button>
+                </div>
+              </div>
+
+              <div class="row input-radio">
+                <div class="col-xs-12">
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="popularity-sort" name="sort" value="popularity-sort" class="custom-control-input" checked>
+                    <label class="custom-control-label" for="popularity-sort">Sort By Most Popularity</label>
+                  </div>
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="fork-sort" name="sort" value="fork-sort" class="custom-control-input">
+                    <label class="custom-control-label" for="fork-sort">Sort By Most Forks</label>
+                  </div>
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="name-sort" name="sort" value="name-sort" class="custom-control-input">
+                    <label class="custom-control-label" for="name-sort">Sort By Course Name</label>
+                  </div>
+                  <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="contributor-sort" name="sort" value="contributor-sort" class="custom-control-input">
+                    <label class="custom-control-label" for="contributor-sort">Sort By Most Contributors</label>
+                  </div>
+                </div>
+                
+              </div>
       </form>
     </div>
-    <hr>
-    <div class="row">
+
+    <div class="row search">
       <form class="col-xs-12 mx-auto form" id="user-search-form">
           <h2 class="text-secondary">Or maybe you want to find github people who have same or similar name?</h2>
           <div class="input-group mb-3">
@@ -72,14 +124,10 @@
           </div>
       </form>
     </div>
-    <div class="row">
-      <div class="col-xs-12 mx-auto">
-        <button class="btn btn-alert btn-block" id="clear-all-button">Clear All Results</button>
-      </div>
-    </div>
+    <br>
     <!-- data demo area -->
     <div class="row" id="data-area">
-      
+
     </div>
   </div>
 

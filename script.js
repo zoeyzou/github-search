@@ -1,6 +1,22 @@
+const dataArea = document.querySelector('#data-area');
+
+// Add navigation menu
+const navLinks = document.querySelectorAll(".nav-link");
+const searchItems = document.querySelectorAll(".search");
+navLinks.forEach((navlink, index) => {
+  navlink.addEventListener('click', () => {
+    dataArea.innerHTML = '';
+    searchItems.forEach(item => item.style.display = "none");
+    searchItems[index].style.display = "block";
+  });
+});
+
+// Add a clear all button
+const clearAll = document.querySelector('#clear-all-button');
+clearAll.addEventListener('click', () => dataArea.innerHTML = '');
+
 // Event listener for movie API fetch
 const movieForm = document.querySelector('#movie-search-form');
-const dataArea = document.querySelector('#data-area');
 movieForm.addEventListener('submit', event => {
   event.preventDefault();
 
@@ -16,9 +32,9 @@ movieForm.addEventListener('submit', event => {
   const tbody = createTable(dataArea, 'Poster', 'Movie Name'); 
 
   const url = getUrlByMovieName(userInput);
-  getData(url, data => {
+  getAjaxData(url, data => {
     validateData(data, dataArea);
-    showMovies(data.Search, tbody, createMovieData);
+    showMovies(data.results, tbody, createMovieData);
   });
 });
 
@@ -30,7 +46,7 @@ searchAllCourse.addEventListener('click', () => {
   const tbody = createTable(dataArea, 'Course Name', 'Contributors'); 
   
   const hyfUrl = getUrlByRepo('');
-  getData(hyfUrl, data => {
+  getAjaxData(hyfUrl, data => {
     validateData(data.items.length, dataArea);
     showData(data.items, tbody, renderCourseData);
   });
@@ -42,6 +58,7 @@ courseSearchWithInput.addEventListener('submit', event => {
   event.preventDefault();
 
   const userInput = getUserInput('repo-name');
+  console.log(document.querySelector('input[name="sort"]:checked').value);
   //validate user input
   let isValid = checkUserInput(userInput, dataArea);
   if(!isValid) {
@@ -52,7 +69,7 @@ courseSearchWithInput.addEventListener('submit', event => {
   const tbody = createTable(dataArea, 'Course Name', 'Contributors'); 
  
   const url = getUrlByRepo(userInput);
-  getData(url, data => {
+  getAjaxData(url, data => {
     validateData(data.items.length, dataArea);
     showData(data.items, tbody, renderCourseData);
   })
@@ -72,18 +89,15 @@ userSearchForm.addEventListener('submit', event => {
   const tbody = createTable(dataArea, 'Avatar', 'User Name', 'User Score', 'User Repo');
   const url = getUrlByUserName(userInput);
 
-  getData(url, data => {
+  getAjaxData(url, data => {
     validateData(data.items.length, dataArea);
     showData(data.items, tbody, renderUserData);
   })
 });
 
-// Add a clear all button
-const clearAll = document.querySelector('#clear-all-button');
-clearAll.addEventListener('click', () => {
-  dataArea.innerHTML = '';
-});
 
+// --------------------------------------------------------------------------------------------
+// All Functions
 // User input control
 function checkUserInput(userInput, dataArea) {
   if (!userInput) {
@@ -112,16 +126,16 @@ function getUrlByRepo(userInput) {
   return `https://api.github.com/search/repositories?q=user:HackYourFuture-CPH+${userInput}`;
 }
 
-function getUrlByMovieName(userInput) {
-  return `https://www.omdbapi.com/?apikey=6d847b4e&type=movie&s=${userInput}&page=1`;
+function getUrlByMovieName(userInput, page = 1) {
+  return `https://api.themoviedb.org/3/search/movie?api_key=8a0d7ce83346594dde8fd5036d172014&language=en-US&query=${userInput}&page=${page}&include_adult=true`;
 }
 
 function getUrlByMovieID(id) {
-  return `https://www.omdbapi.com/?apikey=6d847b4e&i=${id}`;
+  return `https://api.themoviedb.org/3/movie/${id}?api_key=8a0d7ce83346594dde8fd5036d172014&language=en-US`;
 }
 
 // Ajax call & validate data
-function getData(url, callback) {
+function getAjaxData(url, callback) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   let data = [];
@@ -160,9 +174,7 @@ function createTable(dataArea, ...header) {
   const thead = document.createElement('thead');
   const tr = document.createElement('tr');
   let trContent = '';
-  header.forEach(title => {
-    trContent += `<th scope="col">${title}</th>`;
-  });
+  header.forEach(title =>  trContent += `<th scope="col">${title}</th>`);
   tr.innerHTML = trContent;
   thead.appendChild(tr);
   const tbody = document.createElement('tbody');
@@ -179,11 +191,12 @@ function showData(data, domElement, callback) {
   });
 }
 
-function showMovies(data, DOMEl, callback) {
-  data.forEach(element => {
+function showMovies(movieList, domEl, callback) {
+  movieList.forEach(element => {
     const tr = document.createElement('tr');
+    tr.style.cursor = "pointer";
     tr.innerHTML = callback(element);
-    DOMEl.appendChild(tr);
+    domEl.appendChild(tr);
     const detailArea = tr.querySelector('.details');
 
     tr.addEventListener('click', () => {
@@ -193,13 +206,13 @@ function showMovies(data, DOMEl, callback) {
   });
 }
 
-function createMovieData(element) {
+function createMovieData(element, posterWidth = 200) {
   return `
     <td scope="col">
-      <p>${element.Title}</p>
+      <p>${element.title}</p>
       <div class="details"></div>
     </td>
-    <td scope="col"><img style="width: 100px" src="${element.Poster}"></td>`;
+    <td scope="col"><img src="https://image.tmdb.org/t/p/w${posterWidth}${element.poster_path}"></td>`;
 }
 
 function renderCourseData(element) {
@@ -242,7 +255,7 @@ function renderUserData(element) {
 function getContributorList(url) {
   const div = document.createElement('div');
   div.classList.add('list-group');
-  getData(url, data => {
+  getAjaxData(url, data => {
     data.forEach(item => {
       const a = document.createElement('a');
       a.classList.add('list-group-item', 'list-group-item-action');
@@ -261,15 +274,15 @@ function getContributorList(url) {
 }
 
 function showMovieDetails(movie, detailArea) {
-  const url = getUrlByMovieID(movie.imdbID);
-  getData(url, data => {
+  const url = getUrlByMovieID(movie.id);
+  getAjaxData(url, data => {
     detailArea.innerHTML = `
         <ul>
-          <li>IMDB Rating: ${data.imdbRating}</li>
-          <li>IMDB Vote Count: ${data.imdbVotes}</li>
-          <li>IMDB ID: ${data.imdbId}</li>
-          <li>Publish Year: ${data.Year}</li>
-          <li>Actors: ${data.Actors}</li>
+          <li>Overview: ${data.overview}</li>
+          <li>Popularity: ${data.popularity}</li>
+          <li>IMDB ID: ${data.imdb_id}</li>
+          <li>Release Date: ${data.release_date}</li>
+          <li>Language: ${data.original_language}</li>
         </ul>
         `;
   })
